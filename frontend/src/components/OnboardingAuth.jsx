@@ -11,6 +11,7 @@ import {
   Sparkles,
   GraduationCap
 } from 'lucide-react';
+import heroIllustration from '../assets/hero_illustration.png';
 
 export default function OnboardingAuth({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -196,7 +197,7 @@ export default function OnboardingAuth({ onLoginSuccess }) {
             transition: 'transform 0.25s ease, box-shadow 0.25s ease'
           }}>
             <img 
-              src="/hero_illustration.png" 
+              src={heroIllustration} 
               alt="SkillSwap Students Collaborating" 
               style={{
                 width: '100%',
