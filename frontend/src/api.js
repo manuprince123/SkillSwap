@@ -1,6 +1,6 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (
   typeof window !== 'undefined' && (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io'))
-    ? 'https://skill-swap-two-sepia.vercel.app/api'
+    ? 'https://bouquet-commentary-establishing-popular.trycloudflare.com/api'
     : '/api'
 );
 

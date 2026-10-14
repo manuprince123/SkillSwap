@@ -309,7 +309,8 @@ async def init_db(mongodb_url: Optional[str] = None):
         return
 
     try:
-        motor_client = AsyncIOMotorClient(url, serverSelectionTimeoutMS=4000)
+        import certifi
+        motor_client = AsyncIOMotorClient(url, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=4000)
         # Test ping to check credentials & cluster accessibility
         await motor_client.admin.command('ping')
         db = motor_client[settings.DATABASE_NAME]

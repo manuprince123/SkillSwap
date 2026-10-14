@@ -906,3 +906,41 @@ async def toggle_material_like(material_id: str):
                 return format_material(m)
     return {"status": "ok"}
 
+# Serverless DB Connection Middleware
+@app.middleware("http")
+async def serverless_db_check(request, call_next):
+    from app.database import motor_client, init_db
+    if motor_client is None:
+        try:
+            await init_db()
+        except Exception as e:
+            print(f"[Serverless DB Error]: {e}")
+    response = await call_next(request)
+    return response
+
+# Dual route aliasing: mirrors /api/* routes to /* for serverless URL rewriting
+for r in list(app.routes):
+    if hasattr(r, "path") and r.path.startswith("/api/"):
+        unprefixed = r.path[4:]
+        try:
+            app.add_api_route(
+                unprefixed,
+                r.endpoint,
+                methods=r.methods,
+                response_model=getattr(r, "response_model", None),
+                include_in_schema=False
+            )
+        except Exception:
+            pass
+
+@app.get("/api/index.py", include_in_schema=False)
+@app.get("/api/index", include_in_schema=False)
+async def vercel_entry_ping():
+    return {
+        "name": "SkillSwap API",
+        "status": "online",
+        "version": "1.0.0",
+        "database": "MongoDB Atlas"
+    }
+
+
