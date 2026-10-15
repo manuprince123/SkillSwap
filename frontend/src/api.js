@@ -6,7 +6,12 @@ export function getApiBase() {
     return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
   }
 
-  // 2. Browser localStorage override (allows dynamic backend switching)
+  // 2. Default to live Render backend if hosted on Vercel or cloud domain
+  if (typeof window !== 'undefined' && (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io'))) {
+    return 'https://skillswap-backend-wo6b.onrender.com/api';
+  }
+
+  // 3. Browser localStorage override (allows dynamic backend switching)
   if (typeof window !== 'undefined') {
     const customApi = window.localStorage.getItem('skillswap_api_base');
     if (customApi && customApi.trim()) {
@@ -15,7 +20,7 @@ export function getApiBase() {
     }
   }
 
-  // 3. Fallback to local Vite dev proxy /api
+  // 4. Fallback to local Vite dev proxy /api
   return '/api';
 }
 
