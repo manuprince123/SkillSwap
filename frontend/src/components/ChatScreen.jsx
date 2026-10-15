@@ -12,7 +12,7 @@ import {
   Sparkles,
   MessageSquare
 } from 'lucide-react';
-import { fetchSwaps, fetchChat, sendChatMessage, updateSwapStatus } from '../api';
+import { fetchSwaps, fetchChat, sendChatMessage, updateSwapStatus, getWsBase } from '../api';
 
 export default function ChatScreen({ currentUser, activeSwapId, onScheduleSession }) {
   const [swaps, setSwaps] = useState([]);
@@ -87,8 +87,8 @@ export default function ChatScreen({ currentUser, activeSwapId, onScheduleSessio
 
   const setupWebSocket = (swapId) => {
     try {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/chat/${swapId}/${currentUser.id}`;
+      const wsBase = getWsBase();
+      const wsUrl = `${wsBase}/ws/chat/${swapId}/${currentUser.id}`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {

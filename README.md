@@ -66,28 +66,55 @@ cd backend
 
 ---
 
-## ☁️ Deployment Guide (Live Hosting)
+## ☁️ Deployment Guide (Live Hosting on Render + Vercel)
 
-### 1. Backend on Render / Railway
-1. Push this repository to GitHub.
-2. In [Render.com](https://render.com), create a **New Web Service** connected to your repo.
-3. Set:
-   - **Root Directory**: `backend`
-   - **Environment**: `Python 3`
+### 1. Deploy Backend on Render (WebSockets + FastAPI + MongoDB Atlas)
+Render runs the persistent Python Uvicorn server required for real-time WebSocket messaging and MongoDB Atlas connectivity.
+
+#### Option A: 1-Click via Render Blueprint (`render.yaml`)
+1. In [Render Dashboard](https://dashboard.render.com), click **New +** → **Blueprint**.
+2. Select your `SkillSwap` GitHub repository.
+3. Render will automatically read [`render.yaml`](file:///Users/manur/Desktop/uiux/render.yaml) and configure the service:
+   - Sets root directory to `backend`
+   - Sets Python 3 runtime and `pip install -r requirements.txt`
+   - Configures `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. When prompted for `MONGODB_URL`, enter your connection string:
+   `mongodb+srv://<username>:<password>@cluster0.witllbk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+5. Click **Apply**. Once deployed, copy your Render service URL (e.g., `https://skillswap-backend.onrender.com`).
+
+#### Option B: Manual Web Service
+1. In [Render](https://render.com), click **New +** → **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the following fields:
+   - **Name**: `skillswap-backend`
+   - **Root Directory**: `backend` *(crucial for monorepo)*
+   - **Runtime**: `Python 3`
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. In **Environment Variables**, add:
-   - `MONGODB_URL`: `mongodb+srv://<user>:<password>@cluster0.witllbk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+4. Under **Environment Variables**, add:
+   - `MONGODB_URL`: your MongoDB Atlas connection string
    - `DATABASE_NAME`: `skillswap`
+   - `JWT_SECRET`: `skillswap_super_secure_secret_key_2026_campus_auth`
+   - `PYTHON_VERSION`: `3.11.9`
+5. Click **Deploy Web Service**.
 
-### 2. Frontend on Vercel
-1. In [Vercel.com](https://vercel.com), import your repository.
-2. Set:
-   - **Root Directory**: `frontend`
+---
+
+### 2. Deploy Frontend on Vercel (React + Vite SPA)
+Vercel hosts the React frontend on global edge CDNs.
+
+1. Go to [Vercel Dashboard](https://vercel.com/new) and import your `SkillSwap` GitHub repository.
+2. In the **Configure Project** screen:
    - **Framework Preset**: `Vite`
+   - **Root Directory**: Click *Edit* and select **`frontend`** *(crucial)*
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
-3. In `frontend/src/api.js`, set `API_BASE` to your deployed Render backend URL (e.g. `https://skillswap-api.onrender.com/api`).
+3. Expand **Environment Variables** and add:
+   - **Key**: `VITE_API_BASE_URL`
+   - **Value**: `https://<your-render-backend-name>.onrender.com/api`
+   *(Replace with your actual Render URL from Step 1, including `/api`)*
+4. Click **Deploy**.
+5. Vercel will build and assign a live production URL (e.g., `https://skillswap.vercel.app`).
 
 ---
 

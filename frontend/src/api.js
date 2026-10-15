@@ -1,8 +1,39 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (
-  typeof window !== 'undefined' && (window.location.hostname.includes('vercel.app') || window.location.hostname.includes('github.io'))
-    ? 'https://bouquet-commentary-establishing-popular.trycloudflare.com/api'
-    : '/api'
-);
+export function getApiBase() {
+  // 1. Production Vercel environment variable (points to Render backend)
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && envUrl.trim()) {
+    const trimmed = envUrl.trim().replace(/\/+$/, '');
+    return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+  }
+
+  // 2. Browser localStorage override (allows dynamic backend switching)
+  if (typeof window !== 'undefined') {
+    const customApi = window.localStorage.getItem('skillswap_api_base');
+    if (customApi && customApi.trim()) {
+      const trimmed = customApi.trim().replace(/\/+$/, '');
+      return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+    }
+  }
+
+  // 3. Fallback to local Vite dev proxy /api
+  return '/api';
+}
+
+export function getWsBase() {
+  const apiBase = getApiBase();
+  if (apiBase.startsWith('http')) {
+    const wsProto = apiBase.startsWith('https:') ? 'wss:' : 'ws:';
+    const host = apiBase.replace(/^https?:\/\//, '').replace(/\/api\/?$/, '');
+    return `${wsProto}//${host}`;
+  }
+  const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = typeof window !== 'undefined' ? window.location.host : 'localhost:8000';
+  return `${protocol}//${host}`;
+}
+
+const getEndpoint = (path) => `${getApiBase()}${path.startsWith('/') ? path : `/${path}`}`;
+
+export const API_BASE = getApiBase();
 
 export async function fetchClusterStatus() {
   const res = await fetch(`${API_BASE}/cluster/status`);
