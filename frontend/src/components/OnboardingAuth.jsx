@@ -12,6 +12,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import heroIllustration from '../assets/hero_illustration.png';
+import { loginUser, registerUser } from '../api';
 
 export default function OnboardingAuth({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -43,23 +44,11 @@ export default function OnboardingAuth({ onLoginSuccess }) {
           skills_to_teach: [{ name: teachSkill, category: 'General', proficiency: 'Intermediate' }],
           skills_to_learn: [{ name: learnSkill, category: 'General', target_goal: 'Skill exchange' }]
         };
-        const res = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Registration failed');
+        const data = await registerUser(payload);
         onLoginSuccess(data.user);
       } else {
         // Login API
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Login failed');
+        const data = await loginUser(email, password);
         onLoginSuccess(data.user);
       }
     } catch (err) {
@@ -74,12 +63,7 @@ export default function OnboardingAuth({ onLoginSuccess }) {
     setPassword(userPass);
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail, password: userPass })
-      });
-      const data = await res.json();
+      const data = await loginUser(userEmail, userPass);
       onLoginSuccess(data.user);
     } catch (err) {
       setErrorMessage('Could not log in as demo student.');
